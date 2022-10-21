@@ -1,14 +1,32 @@
 const articles = require("../db/articles.json");
+const categories = require("../db/categories.json");
 
 const HttpException = require("../exceptions/HttpException");
-
-const API_URL = require("../config/config");
 
 const findDataById = require("../utils/findDataById");
 const createId = require("../utils/createId");
 const deleteData = require("../utils/deleteData");
 
-const getArticles = async () => {
+const getArticles = async (query) => {
+  query.category = query.category || null;
+  query.search = query.search || null;
+
+  if (query.category) {
+    const articlesList = articles.filter((article) => {
+      return article.categories.find(
+        (cat) => cat.title.toLowerCase() === query.category.toLowerCase()
+      );
+    });
+    return articlesList;
+  }
+
+  if (query.search) {
+    const articlesList = articles.filter((article) => {
+      return article.title.includes(query.search);
+    });
+    return articlesList;
+  }
+
   return articles;
 };
 
@@ -24,6 +42,11 @@ const getSingleArticle = async (id) => {
   return article;
 };
 
+const getLastsArticles = async () => {
+  const lastsArticles = articles.slice(-3);
+  return lastsArticles;
+};
+
 const createArticle = async (data) => {
   const { title, imageUrl, content, categoryIds } = data;
 
@@ -37,20 +60,18 @@ const createArticle = async (data) => {
 
   const id = createId(articles);
 
-  const categoryLinks = categoryIds.map((id) => {
+  const categoriesList = categoryIds.map((id) => {
     id = Number(id);
-    return `${API_URL}/categories/${id}`;
+    const category = findDataById(id, categories);
+    return category;
   });
-  const _links = {
-    categories: categoryLinks,
-  };
 
   const newArticle = {
     id,
     title,
     imageUrl,
     content,
-    _links,
+    categories: categoriesList,
   };
 
   articles.push(newArticle);
@@ -79,21 +100,18 @@ const updateArticle = async (id, data) => {
     throw new HttpException(400, "categoryIds must be an array");
   }
 
-  const categoryLinks = categoryIds.map((id) => {
+  const categoriesList = categoryIds.map((id) => {
     id = Number(id);
-    return `${API_URL}/categories/${id}`;
+    const category = findDataById(id, categories);
+    return category;
   });
-
-  const _links = {
-    categories: categoryLinks,
-  };
 
   const updatedArticle = {
     id,
     title,
     imageUrl,
     content,
-    _links,
+    categories: categoriesList,
   };
 
   const index = articles.findIndex((article) => article.id === id);
@@ -119,6 +137,7 @@ const dropArticle = (id) => {
 module.exports = {
   getArticles,
   getSingleArticle,
+  getLastsArticles,
   createArticle,
   updateArticle,
   dropArticle,

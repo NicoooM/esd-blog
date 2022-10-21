@@ -3,6 +3,7 @@ const express = require("express");
 const {
   getAllArticles,
   getArticleById,
+  getLatestsArticles,
   postArticle,
   putArticle,
   deleteArticle,
@@ -20,6 +21,7 @@ const router = express.Router();
 
 // articles
 router.get("/articles", getAllArticles);
+router.get("/articles/latests", getLatestsArticles);
 router.get("/articles/:id", getArticleById);
 router.post("/articles", postArticle);
 router.put("/articles/:id", putArticle);

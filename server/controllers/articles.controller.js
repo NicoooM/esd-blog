@@ -4,11 +4,12 @@ const {
   createArticle,
   updateArticle,
   dropArticle,
+  getLastsArticles,
 } = require("../services/articles.service");
 
 const getAllArticles = async (req, res, next) => {
   try {
-    const articlesData = await getArticles();
+    const articlesData = await getArticles(req.query);
     res.status(200).json(articlesData);
     next();
   } catch (err) {
@@ -20,6 +21,16 @@ const getArticleById = async (req, res, next) => {
   try {
     const articleData = await getSingleArticle(req.params.id);
     res.status(200).json(articleData);
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getLatestsArticles = async (req, res, next) => {
+  try {
+    const articlesData = await getLastsArticles();
+    res.status(200).json(articlesData);
     next();
   } catch (err) {
     next(err);
@@ -56,6 +67,7 @@ const deleteArticle = async (req, res, next) => {
 module.exports = {
   getAllArticles,
   getArticleById,
+  getLatestsArticles,
   postArticle,
   putArticle,
   deleteArticle,
